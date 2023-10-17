@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHIT-CHAT</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+
+</head>
+
+
+    <main class="container p-5 mt-5 shadow">
+        <h1 class="fw-bold mb-5">CHIT-CHAT 💬</h1>
+        <label for="user_name">Name:</label>
+        <input id="user_name" class="form-control" type="text" placeholder="Enter your name">
+
+         <!--Chat section-->
+    <section>
+        <div class="card mt-4" style="overflow-y: scroll; height:500px">
+            <div class="card-body" id="message_area">
+                
+                </div>
+
+                
+
+            </div>
+        </div>
+    </section>
+
+        <!--Message section-->
+        <textarea id="message_content" class="form-control mt-3" placeholder="Write your message here..."></textarea>
+        <button id="send_button" class="btn btn-primary btn-sm mt-2">Send →</button>
+    </main>
+
+   
+    
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, addDoc , orderBy, query, Timestamp} from 'https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js';
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
+      
+        // Your web app's Firebase configuration
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+    apiKey: "AIzaSyCuaXqUSrR9vJL1f4UA0gw-DC7RuQs0BJo",
+    authDomain: "chitchat-47c89.firebaseapp.com",
+    projectId: "chitchat-47c89",
+    storageBucket: "chitchat-47c89.appspot.com",
+    messagingSenderId: "882312415816",
+    appId: "1:882312415816:web:52fca77b2cbd11da82667d"
+  };
+      
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+
+        const db = getFirestore(app);
+
+        //send new message
+        document.querySelector("#send_button").addEventListener("click", () =>{
+          
+            if(document.querySelector("#user_name").value != "" && document.querySelector("#message_content").value!=""){
+                
+                addDoc(collection(db,"messages"), {
+                sender: document.querySelector("#user_name").value,
+                message: document.querySelector("#message_content").value,
+                timestamp: Timestamp.fromDate(new Date())
+            });
+            document.querySelector("#message_content").value ="";
+            } else {
+                alert("Cannot be empty!");
+            }
+
+            
+
+        }); 
+
+         onSnapshot(query(collection(db, "messages"), orderBy("timestamp","asc")), snapshot => {
+            document.querySelector("#message_area").innerHTML = "";
+            snapshot.forEach(message => {
+
+                if(message.data().sender == document.querySelector("#user_name").value ) {
+
+                    document.querySelector("#message_area").innerHTML += 
+                `
+                <div class="row m-0">
+                    <div class="col-md-6 mb-2 offset-md-6">
+                        <div class="alert bg-light mb-0">
+                            <small class="small fw-bold">${message.data().sender}</small>
+                            <br>
+                            <span>${message.data().message}</span>
+                        </div>
+                        <small class="text-secondary ">${message.data().timestamp.toDate().toLocaleTimeString('en-US')}</small>
+
+                    </div>
+
+                </div>
+                `;
+
+                } else {
+
+                    document.querySelector("#message_area").innerHTML += 
+                `
+                <div class="row m-0">
+                    <div class="col-md-6 mb-2">
+                        <div class="alert bg-primary text-white mb-0">
+                            <small class="small fw-bold">${message.data().sender}</small>
+                            <br>
+                            <span>${message.data().message}</span>
+                        </div>
+                        <small class="text-secondary float-end">${message.data().timestamp.toDate().toLocaleTimeString('en-US')}</small>
+
+                    </div>
+
+                </div>
+                `;
+
+                }
+
+                
+              
+            })
+
+            document.querySelector("#message_area").scrollIntoView(false);
+        }); 
+
+
+        
+      </script>
+</body> 
+</html>
